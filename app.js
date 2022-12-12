@@ -29,7 +29,9 @@ const usersHandlers = require("./usersHandlers");
 
 app.get("/api/users", usersHandlers.getUsers);
 
-app.post("/api/users", usersHandlers.postUser);
+const { hashPassword } = require("./auth.js");
+
+app.post("/api/users", hashPassword, usersHandlers.postUser);
 
 app.get("/api/users/:id", usersHandlers.getUsersById);
 
