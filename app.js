@@ -11,32 +11,33 @@ const welcome = (req, res) => {
   res.send("Welcome to my favorite movie list");
 };
 
+const { hashPassword, verifyPassword, verifyToken } = require("./auth.js");
+
 app.get("/", welcome);
 
 const movieHandlers = require("./movieHandlers");
-
-app.get("/api/movies", movieHandlers.getMovies);
-
-app.post("/api/movies", movieHandlers.postMovie)
-
-app.get("/api/movies/:id", movieHandlers.getMovieById);
-
-app.put("/api/movies/:id", movieHandlers.modifyMovieById);
-
-app.delete("/api/movies/:id", movieHandlers.deleteMovieById);
-
 const usersHandlers = require("./usersHandlers");
 
+app.get("/api/movies", movieHandlers.getMovies);
+app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.get("/api/users", usersHandlers.getUsers);
-
-const { hashPassword } = require("./auth.js");
-
-app.post("/api/users", hashPassword, usersHandlers.postUser);
-
 app.get("/api/users/:id", usersHandlers.getUsersById);
 
-app.put("/api/users/:id", usersHandlers.changeUserById);
+app.post("/api/users", hashPassword, usersHandlers.postUser);
+app.post(
+  "/api/login", usersHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 
+
+app.use(verifyToken);
+
+app.post("/api/movies", verifyToken, movieHandlers.postMovie)
+app.put("/api/movies/:id", verifyToken, movieHandlers.modifyMovieById);
+app.delete("/api/movies/:id", verifyToken, movieHandlers.deleteMovieById);
+
+
+app.put("/api/users/:id", usersHandlers.changeUserById);
 app.delete("/api/users/:id", usersHandlers.deleteUserById);
 
 app.listen(port, (err) => {
